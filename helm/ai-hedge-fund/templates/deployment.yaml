@@ -19,12 +19,14 @@ spec:
         - name: ai-hedge-fund
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
-          command: ["sleep", "infinity"]
+          command: ["python", "-m", "uvicorn", "app.backend.main:app", "--host", "0.0.0.0", "--port", "8501"]
           env:
             - name: PYTHONUNBUFFERED
               value: "1"
             - name: PYTHONPATH
               value: /app
+            - name: ALLOWED_ORIGINS
+              value: "https://ai-hedge-fund.istayintek.com,http://localhost:5173"
           envFrom:
             - secretRef:
                 name: ai-hedge-fund-secrets
@@ -33,6 +35,18 @@ spec:
             - name: web
               containerPort: 8501
               protocol: TCP
+          readinessProbe:
+            httpGet:
+              path: /docs
+              port: 8501
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /docs
+              port: 8501
+            initialDelaySeconds: 10
+            periodSeconds: 30
           {{- with .Values.resources }}
           resources:
             {{- toYaml . | nindent 12 }}
