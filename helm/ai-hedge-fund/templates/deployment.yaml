@@ -1,0 +1,43 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ai-hedge-fund
+  namespace: ai-hedge-fund
+  labels:
+    app: ai-hedge-fund
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app: ai-hedge-fund
+  template:
+    metadata:
+      labels:
+        app: ai-hedge-fund
+    spec:
+      containers:
+        - name: ai-hedge-fund
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          command: ["sleep", "infinity"]
+          env:
+            - name: PYTHONUNBUFFERED
+              value: "1"
+            - name: PYTHONPATH
+              value: /app
+          envFrom:
+            - secretRef:
+                name: ai-hedge-fund-secrets
+                optional: true
+          ports:
+            - name: web
+              containerPort: 8501
+              protocol: TCP
+          {{- with .Values.resources }}
+          resources:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}

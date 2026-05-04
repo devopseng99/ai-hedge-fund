@@ -1,0 +1,21 @@
+replicaCount: 1
+
+image:
+  repository: "192.168.29.147:5000/ai-hedge-fund"
+  tag: "latest"
+  pullPolicy: IfNotPresent
+
+service:
+  type: ClusterIP
+  port: 8501
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 256Mi
+  limits:
+    cpu: "1"
+    memory: 1Gi
+
+nodeSelector:
+  kubernetes.io/hostname: mgplcb05
